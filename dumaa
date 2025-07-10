@@ -1,0 +1,11 @@
+<operation name="DocKeywordReplace">
+  <participant name="DocumentKeywordReplace"/>
+  <output message="outmsg">
+    <assign to="doc_name">/ProcessData/PrimaryDocument</assign>
+    <assign to="FindString">}{</assign>
+    <assign to="ReplaceString">}\n{</assign>
+  </output>
+  <input message="inmsg">
+    <assign to="." from="*"></assign>
+  </input>
+</operation>
