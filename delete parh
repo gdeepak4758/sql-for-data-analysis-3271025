@@ -2,26 +2,31 @@
  <sequence name="Sequence Start">
  
  <operation name="Timestamp Utility">
-      <participant name="TimestampUtilService"/>
-      <output message="xout">
-        <assign to="action">format</assign>
-        <assign to="baseTime" from="&apos;now&apos;"></assign>
-        <assign to="format">yyyyMMdd</assign>
-      </output>
-      <input message="in">
-        <assign to="." from="formattedTime"></assign>
-      </input>
-    </operation>
+  <participant name="TimestampUtilService"/>
+  <output message="TimestampUtilServiceTypeInputMessage">
+    <assign to="action">add</assign>
+    <assign to="baseTime">now</assign>
+    <assign to="baseTimeFormat">yyyy-MM-dd HH:mm:ss</assign>
+    <assign to="format">yyyy-MM-dd HH:mm:ss</assign>
+    <assign to="offsetTime">-1</assign>  
+    <assign to="scale">day</assign>      
+    <assign to="." from="*"/>
+  </output>
+  <input message="inmsg">
+    <assign to="/ProcessData/calculated" from="*" append="true"/>
+  </input>
+</operation>
 	
-	<assign to="Time" from="number(/ProcessData/formattedTime/text())-1"/>
+	<assign to="Time" from="/ProcessData/calculated/time"/>
 	
+	<assign to="/ProcessData/dynamicFilter" from="concat('sfg_logs_', /ProcessData/Time/time, '.json')"/>
 	
     <operation name="File System Adapter">
-      <participant name="CopyOffilesystem"/>
+      <participant name="E5FileSystem"/>
       <output message="FileSystemInputMessage">
         <assign to="Action">FS_COLLECT</assign>
         <assign to="bootstrap">false</assign>
-		<assign to="filter">*_/ProcessData/Time.json</assign>
+		<assign to="filter" from="/ProcessData/dynamicFilter"/>
         <assign to="collectionFolder">/software/data/mysftpuser/upload/Test/Inbound/Demo</assign>
         <assign to="fileModTimeThreshold">10</assign>
         <assign to="thresholdWait">true</assign>
@@ -34,10 +39,6 @@
       </input>
     </operation>
 	
-	 </sequence>
-	 
-	 
- <sequence name="Cleaning from database">
 
  <operation name="LightweightJDBCAdapterType">
       <participant name="LightweightJDBCAdapterQuery"/>
